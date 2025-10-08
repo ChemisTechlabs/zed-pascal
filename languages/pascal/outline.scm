@@ -1,17 +1,17 @@
 ; Program declaration
-(declProgram 
+(program 
   (kProgram) @context
-  name: (identifier) @name) @item
+  (moduleName (identifier) @name)) @item
 
 ; Unit declaration
-(declUnit
+(unit
   (kUnit) @context
-  name: (identifier) @name) @item
+  (moduleName (identifier) @name)) @item
 
 ; Library declaration  
-(declLibrary
+(library
   (kLibrary) @context
-  name: (identifier) @name) @item
+  (moduleName (identifier) @name)) @item
 
 ; Procedure declarations
 (declProc
@@ -35,60 +35,52 @@
 
 ; Type declarations
 (declType
-  (kType) @context
   name: (identifier) @name) @item
 
 ; Class declarations
-(declClass
-  (kClass) @context
-  name: (identifier) @name) @item
+(declType
+  name: (identifier) @name
+  type: (declClass
+    (kClass) @context)) @item
 
 ; Record declarations
-(declRecord
-  (kRecord) @context
-  name: (identifier) @name) @item
+(declType
+  name: (identifier) @name
+  type: (declClass
+    (kRecord) @context)) @item
 
 ; Interface declarations
-(declInterface
-  (kInterface) @context
-  name: (identifier) @name) @item
+(declType
+  name: (identifier) @name
+  type: (declIntf
+    (kInterface) @context)) @item
 
 ; Object declarations
-(declObject
-  (kObject) @context
-  name: (identifier) @name) @item
+(declType
+  name: (identifier) @name
+  type: (declClass
+    (kObject) @context)) @item
 
 ; Constant declarations
 (declConst
-  (kConst) @context
   name: (identifier) @name) @item
 
 ; Variable declarations
 (declVar
-  (kVar) @context
   name: (identifier) @name) @item
 
 ; Property declarations
 (declProp
-  (kProperty) @context
   name: (identifier) @name) @item
 
 ; Interface section
-(interface
-  (kInterface) @context
-  @name) @item
+(interface) @item
 
 ; Implementation section
-(implementation
-  (kImplementation) @context
-  @name) @item
+(implementation) @item
 
 ; Initialization section
-(initialization
-  (kInitialization) @context
-  @name) @item
+(initialization) @item
 
 ; Finalization section
-(finalization
-  (kFinalization) @context
-  @name) @item
+(finalization) @item

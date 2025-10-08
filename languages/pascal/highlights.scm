@@ -142,7 +142,7 @@
 [
   (kTrue)
   (kFalse)
-] @constant.builtin
+] @boolean
 
 ; Punctuation - brackets
 [
@@ -202,19 +202,27 @@
 (declProc name: (genericDot rhs: (genericTpl entity: (identifier) @function)))
 
 ; Property declarations
-(declProp name: (identifier) @function)
+(declProp name: (identifier) @property)
 
 ; Function parameters
-(declArg name: (identifier) @parameter)
+(declArg name: (identifier) @variable)
 
 ; Template parameters
-(genericArg name: (identifier) @type.parameter)
+(genericArg name: (identifier) @type)
 (genericArg type: (typeref) @type)
 
 ; Exception parameters
-(exceptionHandler variable: (identifier) @parameter)
+(exceptionHandler variable: (identifier) @variable)
 
-; Type references
+; Type references - more specific patterns first
+(typeref (identifier) @type)
+(declString (kString) @type)
+(declArray (kArray) @type)
+(declFile (kFile) @type)
+(declSet (kSet) @type)
+(declMetaClass (kClass) @type)
+
+; General type references
 (typeref) @type
 
 ; Constants and labels
@@ -225,29 +233,47 @@
 
 ; Variable and constant declarations
 (declVar name: (identifier) @variable)
-(declField name: (identifier) @variable)
+(declField name: (identifier) @property)
 (declConst name: (identifier) @constant)
 (declEnumValue name: (identifier) @constant)
 
 ; Function calls
-(exprCall entity: (identifier) @function.call)
-(exprCall entity: (exprTpl entity: (identifier) @function.call))
-(exprCall entity: (exprDot rhs: (identifier) @function.call))
-(exprCall entity: (exprDot rhs: (exprTpl entity: (identifier) @function.call)))
+(exprCall (identifier) @function)
+(exprCall entity: (exprTpl entity: (identifier) @function))
+(exprCall entity: (exprDot rhs: (identifier) @function))
+(exprCall entity: (exprDot rhs: (exprTpl entity: (identifier) @function)))
+
+; Dot notation field access
+(exprDot rhs: (identifier) @property)
 
 ; Generic types and functions
 (genericDot (identifier) @type)
 (genericDot (genericTpl entity: (identifier) @type))
 
 ; Exit, Break, Continue statements
-(statement ((identifier) @keyword.control
-  (#match? @keyword.control "^[eE][xX][iI][tT]$")))
-(statement (exprCall entity: ((identifier) @keyword.control
-  (#match? @keyword.control "^[eE][xX][iI][tT]$"))))
-(statement ((identifier) @keyword.control
-  (#match? @keyword.control "^[bB][rR][eE][aA][kK]$")))
-(statement ((identifier) @keyword.control
-  (#match? @keyword.control "^[cC][oO][nN][tT][iI][nN][uU][eE]$")))
+(statement ((identifier) @keyword
+  (#match? @keyword "^[eE][xX][iI][tT]$")))
+(statement (exprCall entity: ((identifier) @keyword
+  (#match? @keyword "^[eE][xX][iI][tT]$"))))
+(statement ((identifier) @keyword
+  (#match? @keyword "^[bB][rR][eE][aA][kK]$")))
+(statement ((identifier) @keyword
+  (#match? @keyword "^[cC][oO][nN][tT][iI][nN][uU][eE]$")))
+
+; Program/Unit/Library names - highlight like Go package names
+(program (moduleName (identifier) @namespace))
+(unit (moduleName (identifier) @namespace))
+(library (moduleName (identifier) @namespace))
+
+; Variable type references in declarations
+(declVar type: (type (typeref (identifier) @type)))
+(declVar type: (type (declString (kString) @type)))
+(declVar type: (type (declArray (kArray) @type)))
+(declVar type: (type (declFile (kFile) @type)))
+(declVar type: (type (declSet (kSet) @type)))
+
+; Statement with single identifier - highlight as function call
+(statement (identifier) @function)
 
 ; Default identifier highlighting
 (identifier) @variable
