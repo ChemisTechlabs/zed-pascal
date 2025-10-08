@@ -1,7 +1,7 @@
 name = "Pascal"
 grammar = "pascal"
 path_suffixes = ["pas", "pp", "lpr", "dpr", "inc", "p"]
-line_comments = ["// ", "{ ", "(* "]
+line_comments = ["// "]
 block_comments = [
     { start = "{", end = "}" },
     { start = "(*", end = "*)" }
