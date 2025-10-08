@@ -1,6 +1,7 @@
 program displayname;
 var
-  name: string;
+  name, a: String;
+  outro: Char;
 begin
   writeln('Enter your name: ');
   readln(name);
