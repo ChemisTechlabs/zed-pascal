@@ -2,12 +2,12 @@
 
 A Pascal Language extension for Zed Editor.
 
-| Feature                | Status         |
-| ---------------------- | -------------- |
-| Grammar (highlighting) | 🟡 Pending     |
-| Language Server (LSP)  | ⚪ Planned     |
-| Linter                 | ⚪ Planned     |
-| Formatter              | ⚪ Planned     |
+| Feature                | Status             |
+| ---------------------- | ------------------ |
+| Grammar (highlighting) | 🟡 In Progress     |
+| Language Server (LSP)  | ⚪ Planned         |
+| Linter                 | ⚪ Planned         |
+| Formatter              | ⚪ Planned         |
 
 ## Notes
 
