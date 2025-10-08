@@ -8,4 +8,4 @@ repository = "https://github.com/ChemisTechlabs/zed-pascal"
 
 [grammars.pascal]
 repository = "https://github.com/ChemisTechlabs/tree-sitter-pascal"
-commit = "f3344ddada444c5c07e58a41daeef35f1dce81a1"
+rev = "489e273895a452a79dc74749ed99793d20ee85c1"
