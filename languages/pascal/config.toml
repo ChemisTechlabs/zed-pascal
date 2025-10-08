@@ -1,0 +1,25 @@
+name = "Pascal"
+grammar = "pascal"
+path_suffixes = ["pas", "pp", "lpr", "dpr", "inc", "p"]
+line_comments = ["// ", "{ ", "(* "]
+block_comments = [
+    { start = "{", end = "}" },
+    { start = "(*", end = "*)" }
+]
+tab_size = 2
+hard_tabs = false
+autoclose_before = ";:.,=}])"
+brackets = [
+    { start = "(", end = ")", close = true, newline = false },
+    { start = "[", end = "]", close = true, newline = false },
+    { start = "begin", end = "end", close = true, newline = true },
+    { start = "case", end = "end", close = true, newline = true },
+    { start = "record", end = "end", close = true, newline = true },
+    { start = "class", end = "end", close = true, newline = true },
+    { start = "try", end = "end", close = true, newline = true },
+    { start = "repeat", end = "until", close = true, newline = true },
+    { start = "{", end = "}", close = true, newline = false, not_in = ["string"] },
+    { start = "(*", end = "*)", close = true, newline = false, not_in = ["string"] },
+    { start = "'", end = "'", close = true, newline = false, not_in = ["string"] },
+    { start = "\"", end = "\"", close = true, newline = false, not_in = ["string"] }
+]
