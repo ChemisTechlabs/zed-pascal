@@ -183,12 +183,20 @@
   (kHat)
 ] @operator
 
+; Highlight overloaded operator identifiers
+(operatorName) @operator
+
 ; Literals
 (literalNumber) @number
 (literalString) @string
+(literalChar) @string.special
 
-; Comments and preprocessor
+; Comments
 (comment) @comment
+((comment) @comment.doc
+  (#match? @comment.doc "^///"))
+
+; Preprocessor node (e.g. {$IFDEF ...}).
 (pp) @preproc
 
 ; Type declarations
@@ -200,6 +208,9 @@
 (declProc name: (genericTpl entity: (identifier) @function))
 (declProc name: (genericDot rhs: (identifier) @function))
 (declProc name: (genericDot rhs: (genericTpl entity: (identifier) @function)))
+
+(declProc name: (typerefDot rhs: (identifier) @function))
+(declProc name: (typerefDot lhs: (identifier) @type rhs: (identifier) @function))
 
 ; Property declarations
 (declProp name: (identifier) @property)
@@ -222,18 +233,21 @@
 (declSet (kSet) @type)
 (declMetaClass (kClass) @type)
 
-; General type references
-(typeref) @type
+;Highlight generics i.e TList<>
+(typerefTpl entity: (identifier) @type)
+
+(typerefDot rhs: (identifier) @type)
+(typerefPtr (identifier) @type)
 
 ; Constants and labels
 [
   (caseLabel)
   (label)
-] @constant
+] @label
 
 ; Variable and constant declarations
 (declVar name: (identifier) @variable)
-(declField name: (identifier) @property)
+(declField name: (identifier) @variable)
 (declConst name: (identifier) @constant)
 (declEnumValue name: (identifier) @constant)
 
@@ -250,6 +264,9 @@
 (genericDot (identifier) @type)
 (genericDot (genericTpl entity: (identifier) @type))
 
+; Highlight generic argument identifiers as types
+(typerefArgs (identifier) @type)
+
 ; Exit, Break, Continue statements
 (statement ((identifier) @keyword
   (#match? @keyword "^[eE][xX][iI][tT]$")))
@@ -265,6 +282,9 @@
 (unit (moduleName (identifier) @namespace))
 (library (moduleName (identifier) @namespace))
 
+;Highlight uses-clause units as namespaces (e.g. uses System.SysUtils, Vcl.Forms;)
+(declUses (moduleName (identifier) @namespace))
+
 ; Variable type references in declarations
 (declVar type: (type (typeref (identifier) @type)))
 (declVar type: (type (declString (kString) @type)))
@@ -272,8 +292,14 @@
 (declVar type: (type (declFile (kFile) @type)))
 (declVar type: (type (declSet (kSet) @type)))
 
+; Additional type reference captures
+(type (typeref (identifier) @type))
+
+;Highlight attributes
+(procAttribute (identifier) @attribute)
+
 ; Statement with single identifier - highlight as function call
 (statement (identifier) @function)
 
-; Default identifier highlighting
-(identifier) @variable
+; Default identifier highlighting - catch all, highlighting feels better without this
+; (identifier) @variable
