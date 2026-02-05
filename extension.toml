@@ -1,6 +1,6 @@
 id = "pascal"
 name = "Pascal"
-version = "0.0.1"
+version = "0.1.0"
 schema_version = 1
 authors = ["Guilherme Caldas <gcaldas@chemis.tech>"]
 description = "Pascal language support."
