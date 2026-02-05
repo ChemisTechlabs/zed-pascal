@@ -15,4 +15,4 @@ A Pascal Language extension for Zed Editor.
 Chemis Techlabs.
 - Dialects still being mapped. A list of supported Pascal dialects will be soon
 available for documentation and roadmap purposes.
-- Tree Sitter forked from [Isopod/tree-sitter-pascal](https://github.com/Isopod/tree-sitter-pascal)
+- Tree Sitter available at [ChemisTechlabs/tree-sitter-pascal](https://github.com/ChemisTechlabs/tree-sitter-pascal)
