@@ -1,86 +1,203 @@
 ; Program declaration
-(program 
-  (kProgram) @context
-  (moduleName (identifier) @name)) @item
+(program
+    (kProgram) @context
+    (moduleName) @name) @item
+
+; Program uses - bucket
+(program
+    (declUses
+        (kUses) @name) @item)
+
+; Program uses module names
+(program
+    (declUses
+        (moduleName) @name @item))
+
+; Library declaration
+(library
+    (kLibrary) @context
+    (moduleName) @name) @item
 
 ; Unit declaration
 (unit
-  (kUnit) @context
-  (moduleName (identifier) @name)) @item
+    (kUnit) @context
+    (moduleName) @name) @item
 
-; Library declaration  
-(library
-  (kLibrary) @context
-  (moduleName (identifier) @name)) @item
+; Interface - bucket
+(interface
+    (kInterface) @context) @item
 
-; Procedure declarations
-(declProc
-  (kProcedure) @context
-  name: (identifier) @name) @item
+; Interface uses - bucket
+(interface
+    (declUses
+        (kUses) @name) @item)
 
-; Function declarations
-(declProc
-  (kFunction) @context
-  name: (identifier) @name) @item
+; Interface uses module names
+(interface
+    (declUses
+        (moduleName) @name @item))
+
+; Implementation - bucket
+(implementation
+    (kImplementation) @context) @item
+
+; Implementation uses - bucket
+(implementation
+    (declUses
+        (kUses) @name) @item)
+
+; Implementation uses module names
+(implementation
+    (declUses
+        (moduleName) @name @item))
+
+; Type declarations
+(declTypes
+    (kType) @name) @item
+
+(declType
+    (identifier) @name) @item
+
+(declType
+    (declClass
+        (identifier) @name) @item)
+
+; Visibility buckets (class/record sections)
+(declSection
+    (kPrivate) @name) @item
+
+(declSection
+    (kProtected) @name) @item
+
+(declSection
+    (kPublic) @name) @item
+
+(declSection
+    (kPublished) @name) @item
+
+; makes sub nodes, need new idea here
+;(declSection (kStrict) @context (kPrivate) @name) @item
+;(declSection (kStrict) @context (kProtected) @name) @item
 
 ; Constructor declarations
 (declProc
-  (kConstructor) @context
-  name: (identifier) @name) @item
+    (kConstructor) @context
+    name: (_) @name) @item
 
 ; Destructor declarations
 (declProc
-  (kDestructor) @context
-  name: (identifier) @name) @item
+    (kDestructor) @context
+    name: (_) @name) @item
 
-; Type declarations
-(declType
-  name: (identifier) @name) @item
+; Procedure declarations
+(declProc
+    (kProcedure) @context
+    name: (_) @name) @item
 
-; Class declarations
-(declType
-  name: (identifier) @name
-  type: (declClass
-    (kClass) @context)) @item
+; Function declarations
+(declProc
+    (kFunction) @context
+    name: (_) @name) @item
 
-; Record declarations
-(declType
-  name: (identifier) @name
-  type: (declClass
-    (kRecord) @context)) @item
+; Constant declarations - buckets
+(program
+    (declConsts
+        (kConst) @context) @item)
 
-; Interface declarations
-(declType
-  name: (identifier) @name
-  type: (declIntf
-    (kInterface) @context)) @item
+(interface
+    (declConsts
+        (kConst) @context) @item)
 
-; Object declarations
-(declType
-  name: (identifier) @name
-  type: (declClass
-    (kObject) @context)) @item
+(implementation
+    (declConsts
+        (kConst) @context) @item)
 
-; Constant declarations
-(declConst
-  name: (identifier) @name) @item
+; Constant declarations - identifiers
+(program
+    (declConsts
+        (declConst
+            name: (identifier) @name) @item))
 
-; Variable declarations
-(declVar
-  name: (identifier) @name) @item
+(interface
+    (declConsts
+        (declConst
+            name: (identifier) @name) @item))
+
+(implementation
+    (declConsts
+        (declConst
+            name: (identifier) @name) @item))
+
+; Variable declarations - buckets
+(program
+    (declVars
+        (kVar) @context) @item)
+
+(interface
+    (declVars
+        (kVar) @context) @item)
+
+(implementation
+    (declVars
+        (kVar) @context) @item)
+
+; Variable declarations - identifiers
+(program
+    (declVars
+        (declVar) @name @item))
+
+(interface
+    (declVars
+        (declVar) @name @item))
+
+(implementation
+    (declVars
+        (declVar) @name @item))
+
+; Threadvar - buckets
+(program
+    (declVars
+        (kThreadvar) @context) @item)
+
+(interface
+    (declVars
+        (kThreadvar) @context) @item)
+
+(implementation
+    (declVars
+        (kThreadvar) @context) @item)
+
+; Resource string - buckets
+(program
+    (declConsts
+        (kResourcestring) @context) @item)
+
+(interface
+    (declConsts
+        (kResourcestring) @context) @item)
+
+(implementation
+    (declConsts
+        (kResourcestring) @context) @item)
+
+; Resourcestring identifiers use same node as const
+
+; Field declarations
+(declField) @name @item
 
 ; Property declarations
 (declProp
-  name: (identifier) @name) @item
+    (kProperty) @context name: (identifier) @name) @item
 
-; Interface section
-(interface) @item
-
-; Implementation section
-(implementation) @item
+; Program main block (shows as "begin end")
+(program
+    (block
+        (kBegin) @context (kEnd) @name ) @item)
 
 ; Initialization section
-(initialization) @item
+(initialization
+    (kInitialization) @context) @item
 
 ; Finalization section
-(finalization) @item
+(finalization
+    (kFinalization) @context) @item
