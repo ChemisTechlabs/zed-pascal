@@ -9,3 +9,7 @@ repository = "https://github.com/ChemisTechlabs/zed-pascal"
 [grammars.pascal]
 repository = "https://github.com/ChemisTechlabs/tree-sitter-pascal"
 rev = "489e273895a452a79dc74749ed99793d20ee85c1"
+
+[language_servers.pascal]
+name = "pascal-language-server"
+languages = ["Pascal"]
