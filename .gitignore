@@ -11,6 +11,8 @@
 **/*.wasm
 **/*.wasm.map
 grammars/
+target/
+Cargo.lock
 
 # Editor-specific files
 .vscode/
