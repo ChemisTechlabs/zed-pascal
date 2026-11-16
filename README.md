@@ -16,3 +16,5 @@ Chemis Techlabs.
 - Dialects still being mapped. A list of supported Pascal dialects will be soon
 available for documentation and roadmap purposes.
 - Tree Sitter available at [ChemisTechlabs/tree-sitter-pascal](https://github.com/ChemisTechlabs/tree-sitter-pascal)
+- `textobjects.scm` and `injections.scm` are adapted from
+[tree-sitter-delphi13](https://github.com/Alexl-git/tree-sitter-delphi13) (MIT License).
