@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `textobjects.scm`: select inside/around routines, anonymous methods,
+  classes, records, interfaces and helpers; comment blocks
+- `injections.scm`: SQL highlighting inside string literals (needs a SQL
+  extension), conservative matching so prose strings are left alone
+- `overrides.scm`: `string` and `comment` scopes, so the existing
+  `not_in = ["string"]` auto-close rules in `config.toml` take effect
+
 ## [0.1.0] - 2026-02-05
 
 ### Changed
