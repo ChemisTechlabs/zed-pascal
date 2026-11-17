@@ -1,4 +1,6 @@
-use zed_extension_api::{self as zed, LanguageServerId, Result, settings::LspSettings};
+use zed_extension_api::{
+    self as zed, Architecture, LanguageServerId, Os, Result, settings::LspSettings,
+};
 
 struct PascalExtension;
 
@@ -12,17 +14,53 @@ impl zed::Extension for PascalExtension {
         language_server_id: &LanguageServerId,
         worktree: &zed::Worktree,
     ) -> Result<zed::Command> {
-        let mut command = "/usr/bin/pasls".to_string();
+        let mut command = "pasls".to_string();
         let mut args = vec![];
+
+        let (os, arch) = zed::current_platform();
+        let home = std::env::var("HOME").unwrap_or_default();
+        let (target_os, target_cpu, pp, fpcdir, lazarusdir): (&str, &str, &str, &str, String) =
+            match os {
+                Os::Mac => match arch {
+                    Architecture::Aarch64 => (
+                        "darwin",
+                        "aarch64",
+                        "/opt/homebrew/bin/fpc",
+                        "/opt/homebrew/share/fpcsrc",
+                        "/usr/local/share/lazarus".to_string(),
+                    ),
+                    _ => (
+                        "darwin",
+                        "x86_64",
+                        "/usr/local/bin/fpc",
+                        "/usr/local/share/fpcsrc",
+                        "/usr/local/share/lazarus".to_string(),
+                    ),
+                },
+                Os::Linux => (
+                    "linux",
+                    match arch {
+                        Architecture::Aarch64 => "aarch64",
+                        _ => "x86_64",
+                    },
+                    "/usr/bin/fpc",
+                    "/usr/share/fpcsrc",
+                    format!("{home}/.lazarus"),
+                ),
+                Os::Windows => (
+                    "win32",
+                    "x86_64",
+                    r"C:\FPC\bin\x86_64-win64\fpc.exe",
+                    r"C:\Source",
+                    r"C:\lazarus".to_string(),
+                ),
+            };
         let mut env = vec![
-            ("PP".to_string(), "/usr/bin/fpc".to_string()),
-            ("FPCDIR".to_string(), "/usr/share/fpcsrc".to_string()),
-            (
-                "LAZARUSDIR".to_string(),
-                "/home/.lazarus/Lazarus".to_string(),
-            ),
-            ("FPCTARGET".to_string(), "linux".to_string()),
-            ("FPCTARGETCPU".to_string(), "x86_64".to_string()),
+            ("PP".to_string(), pp.to_string()),
+            ("FPCDIR".to_string(), fpcdir.to_string()),
+            ("LAZARUSDIR".to_string(), lazarusdir.to_string()),
+            ("FPCTARGET".to_string(), target_os.to_string()),
+            ("FPCTARGETCPU".to_string(), target_cpu.to_string()),
         ];
 
         if let Ok(lsp_settings) = LspSettings::for_worktree(language_server_id.as_ref(), worktree) {
