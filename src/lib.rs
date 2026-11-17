@@ -1,4 +1,4 @@
-use zed_extension_api::{self as zed, settings::LspSettings, Extension, LanguageServerId, Result};
+use zed_extension_api::{self as zed, LanguageServerId, Result, settings::LspSettings};
 
 struct PascalExtension;
 
@@ -17,11 +17,14 @@ impl zed::Extension for PascalExtension {
         let mut env = vec![
             ("PP".to_string(), "/usr/bin/fpc".to_string()),
             ("FPCDIR".to_string(), "/usr/share/fpcsrc".to_string()),
-            ("LAZARUSDIR".to_string(), "/home/.lazarus/Lazarus".to_string()),
+            (
+                "LAZARUSDIR".to_string(),
+                "/home/.lazarus/Lazarus".to_string(),
+            ),
             ("FPCTARGET".to_string(), "linux".to_string()),
             ("FPCTARGETCPU".to_string(), "x86_64".to_string()),
         ];
-        
+
         if let Ok(lsp_settings) = LspSettings::for_worktree(language_server_id.as_ref(), worktree) {
             if let Some(binary) = lsp_settings.binary {
                 if let Some(path) = binary.path {
@@ -40,7 +43,6 @@ impl zed::Extension for PascalExtension {
                         }
                     }
                 }
-                
             }
         }
 
