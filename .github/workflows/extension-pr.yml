@@ -1,0 +1,33 @@
+name: Extension PR
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  extension-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check CI passed for this commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SHA="${GITHUB_SHA}"
+          STATUS=$(gh api \
+            "repos/${GITHUB_REPOSITORY}/commits/${SHA}/check-runs" \
+            --jq '[.check_runs[] | select(.app.slug == "github-actions" and .name == "CI / check")] | .[0].conclusion')
+          if [ "$STATUS" != "success" ]; then
+            echo "CI has not passed for commit ${SHA} (conclusion: ${STATUS}). Aborting extension PR."
+            exit 1
+          fi
+      - name: Publish to Zed extensions registry
+        uses: huacnlee/zed-extension-action@v2
+        with:
+          extension-name: pascal
+          push-to: ChemisTechlabs/extensions
+        env:
+          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}

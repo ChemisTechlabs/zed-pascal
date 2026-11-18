@@ -1,9 +1,6 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
 
 permissions:
@@ -14,6 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check CI passed for this commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SHA="${GITHUB_SHA}"
+          STATUS=$(gh api \
+            "repos/${GITHUB_REPOSITORY}/commits/${SHA}/check-runs" \
+            --jq '[.check_runs[] | select(.app.slug == "github-actions" and .name == "CI / check")] | .[0].conclusion')
+          if [ "$STATUS" != "success" ]; then
+            echo "CI has not passed for commit ${SHA} (conclusion: ${STATUS}). Aborting release."
+            exit 1
+          fi
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-wasip2
@@ -22,15 +31,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "$GITHUB_REF_NAME" \
-            --title "$GITHUB_REF_NAME" \
+          VERSION=$(grep '^version' extension.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          TAG="v${VERSION}"
+          gh release create "$TAG" \
+            --title "$TAG" \
             --notes "Pascal extension release." \
             target/wasm32-wasip2/release/pascal.wasm
-      - name: Publish to Zed extensions registry
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: huacnlee/zed-extension-action@v2
-        with:
-          extension-name: pascal
-          push-to: ChemisTechlabs/extensions
-        env:
-          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
