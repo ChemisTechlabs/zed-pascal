@@ -1,6 +1,101 @@
-use zed_extension_api::{
-    self as zed, Architecture, LanguageServerId, Os, Result, settings::LspSettings,
-};
+use zed_extension_api::{self as zed, Architecture, LanguageServerId, Os, Result, settings::LspSettings};
+
+/// Repository that publishes prebuilt `pasls` binaries.
+const PASLS_REPO: &str = "ChemisTechlabs/pascal-language-server";
+
+/// Returns the release asset name of a prebuilt `pasls` binary for the given
+/// platform, or `None` when no prebuilt binary is published for it.
+fn pasls_asset_name(os: Os, arch: Architecture) -> Option<&'static str> {
+    match (os, arch) {
+        (Os::Mac, Architecture::Aarch64) => Some("pasls-aarch64-darwin.zip"),
+        // No prebuilt binary is published for macOS Intel.
+        (Os::Mac, _) => None,
+        (Os::Linux, Architecture::Aarch64) => Some("pasls-aarch64-linux.tar.gz"),
+        (Os::Linux, _) => Some("pasls-x86_64-linux.tar.gz"),
+        // No prebuilt binary is published for Windows ARM64.
+        (Os::Windows, Architecture::Aarch64) => None,
+        (Os::Windows, _) => Some("pasls-x86_64-win64.zip"),
+    }
+}
+
+/// Returns a writable cache directory for downloaded binaries.
+///
+/// `std::env::temp_dir` is not usable here: on WASI it panics when `TMPDIR`
+/// is unset, which is the case in Zed's extension sandbox.
+fn cache_dir() -> Result<std::path::PathBuf> {
+    let base = std::env::var_os("HOME")
+        .or_else(|| std::env::var_os("USERPROFILE"))
+        .map(|home| std::path::PathBuf::from(home).join(".cache").join("zed-pascal"))
+        .or_else(|| std::env::current_dir().ok())
+        .ok_or_else(|| "no writable cache directory found".to_string())?;
+    std::fs::create_dir_all(&base)
+        .map_err(|e| format!("failed to create `{}`: {e}", base.display()))?;
+    Ok(base)
+}
+
+/// Recursively finds the binary named `binary_name` inside `dir`.
+fn find_binary(dir: &std::path::Path, binary_name: &str) -> Option<std::path::PathBuf> {
+    for entry in std::fs::read_dir(dir).ok()?.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            if let Some(found) = find_binary(&path, binary_name) {
+                return Some(found);
+            }
+        } else if path.file_name()?.to_string_lossy() == binary_name {
+            return Some(path);
+        }
+    }
+    None
+}
+
+/// Downloads the given `pasls` release asset from the latest release of
+/// [`PASLS_REPO`], extracts it into a cache directory, marks the binary
+/// executable, and returns the path to it.
+fn download_pasls(asset_name: &str) -> Result<String> {
+    let binary_name = if cfg!(windows) { "pasls.exe" } else { "pasls" };
+    let dir = cache_dir()?;
+    let cache_path = dir.join(binary_name);
+    if cache_path.is_file() {
+        // Re-mark executable: an older version may have cached the binary
+        // without the exec bit.
+        zed::make_file_executable(&cache_path.to_string_lossy())
+            .map_err(|e| format!("failed to make `{}` executable: {e}", cache_path.display()))?;
+        return Ok(cache_path.to_string_lossy().into_owned());
+    }
+
+    let release = zed::latest_github_release(
+        PASLS_REPO,
+        zed::GithubReleaseOptions {
+            require_assets: true,
+            pre_release: false,
+        },
+    )
+    .map_err(|e| format!("failed to fetch latest pasls release: {e}"))?;
+    let asset = release
+        .assets
+        .iter()
+        .find(|a| a.name == asset_name)
+        .ok_or_else(|| format!("asset `{asset_name}` not found in latest pasls release"))?;
+
+    let file_type = if asset_name.ends_with(".zip") {
+        zed::DownloadedFileType::Zip
+    } else if asset_name.ends_with(".tar.gz") {
+        zed::DownloadedFileType::GzipTar
+    } else {
+        zed::DownloadedFileType::Uncompressed
+    };
+    let extract_dir = dir.join(asset_name);
+    zed::download_file(&asset.download_url, &extract_dir.to_string_lossy(), file_type)
+        .map_err(|e| format!("failed to download `{asset_name}`: {e}"))?;
+
+    let extracted = find_binary(&extract_dir, binary_name)
+        .ok_or_else(|| format!("`{binary_name}` not found in extracted `{asset_name}`"))?;
+    std::fs::copy(&extracted, &cache_path)
+        .map_err(|e| format!("failed to write `{}`: {e}", cache_path.display()))?;
+    zed::make_file_executable(&cache_path.to_string_lossy())
+        .map_err(|e| format!("failed to make `{}` executable: {e}", cache_path.display()))?;
+    Ok(cache_path.to_string_lossy().into_owned())
+}
 
 /// Checks if a binary exists in the system's PATH or as an absolute/relative path.
 ///
@@ -104,10 +199,21 @@ impl zed::Extension for PascalExtension {
             }
         }
 
+        if command == "pasls" {
+            if let Some(asset) = pasls_asset_name(os, arch) {
+                if let Ok(path) = download_pasls(asset) {
+                    command = path;
+                }
+            }
+        }
+
         if !binary_exists(&command) {
-            return Err(format!(
-                "`{command}` not found in PATH. Install pasls or set `lsp.pasls.binary.path` in settings."
-            ));
+            let hint = if pasls_asset_name(os, arch).is_none() {
+                "No prebuilt pasls binary is published for this platform. Install pasls manually or set `lsp.pasls.binary.path` in settings."
+            } else {
+                "`pasls` not found in PATH and download failed. Install pasls or set `lsp.pasls.binary.path` in settings."
+            };
+            return Err(format!("`{command}` not found. {hint}"));
         }
 
         Ok(zed::Command { command, args, env })
