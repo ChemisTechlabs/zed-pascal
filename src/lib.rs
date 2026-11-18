@@ -2,6 +2,26 @@ use zed_extension_api::{
     self as zed, Architecture, LanguageServerId, Os, Result, settings::LspSettings,
 };
 
+/// Checks if a binary exists in the system's PATH or as an absolute/relative path.
+///
+/// # Arguments
+/// * `command` - The name of the binary or path to check.
+///
+/// # Returns
+/// `true` if the binary exists, `false` otherwise.
+fn binary_exists(command: &str) -> bool {
+    if command.contains(std::path::MAIN_SEPARATOR) || command.contains('/') {
+        return std::path::Path::new(command).is_file();
+    }
+    std::env::var_os("PATH").map_or(false, |paths| {
+        std::env::split_paths(&paths).any(|dir| {
+            let candidate = dir.join(command);
+            candidate.is_file()
+                || std::path::Path::new(&format!("{}.exe", candidate.display())).is_file()
+        })
+    })
+}
+
 struct PascalExtension;
 
 impl zed::Extension for PascalExtension {
@@ -82,6 +102,12 @@ impl zed::Extension for PascalExtension {
                     }
                 }
             }
+        }
+
+        if !binary_exists(&command) {
+            return Err(format!(
+                "`{command}` not found in PATH. Install pasls or set `lsp.pasls.binary.path` in settings."
+            ));
         }
 
         Ok(zed::Command { command, args, env })
