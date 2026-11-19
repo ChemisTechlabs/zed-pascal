@@ -145,22 +145,22 @@ impl zed::Extension for PascalExtension {
 
         let (os, arch) = zed::current_platform();
 
-        if let Ok(lsp_settings) = LspSettings::for_worktree(language_server_id.as_ref(), worktree) {
-            if let Some(binary) = lsp_settings.binary {
-                if let Some(path) = binary.path {
-                    command = path;
-                }
-                if let Some(binary_args) = binary.arguments {
-                    args = binary_args;
-                }
+        if let Ok(lsp_settings) = LspSettings::for_worktree(language_server_id.as_ref(), worktree)
+            && let Some(binary) = lsp_settings.binary
+        {
+            if let Some(path) = binary.path {
+                command = path;
+            }
+            if let Some(binary_args) = binary.arguments {
+                args = binary_args;
+            }
 
-                if let Some(binary_env) = binary.env {
-                    for (key, value) in binary_env {
-                        if let Some(existing) = env.iter_mut().find(|item| item.0 == key) {
-                            existing.1 = value;
-                        } else {
-                            env.push((key, value));
-                        }
+            if let Some(binary_env) = binary.env {
+                for (key, value) in binary_env {
+                    if let Some(existing) = env.iter_mut().find(|item| item.0 == key) {
+                        existing.1 = value;
+                    } else {
+                        env.push((key, value));
                     }
                 }
             }
