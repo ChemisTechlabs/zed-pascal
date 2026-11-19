@@ -17,38 +17,30 @@ on first use and caches it. **No prebuilt binary is available for macOS Intel
 (x86_64) or Windows ARM64** — on those platforms, install
 [pasls](https://github.com/ChemisTechlabs/pascal-language-server) manually on
 `PATH` (download a release binary or build from source, then symlink it into
-a directory on `PATH`), or set `lsp.pascal.binary.path`.
+a directory on `PATH`), or set `lsp.pasls.binary.path`.
 
-The extension spawns `pasls` from `PATH` and sets per-platform defaults
-automatically:
-
-| Env            | Linux               | macOS (ARM)                  | macOS (Intel)              | Windows                           |
-| -------------- | ------------------- | ---------------------------- | -------------------------- | --------------------------------- |
-| `PP`           | `/usr/bin/fpc`      | `/opt/homebrew/bin/fpc`      | `/usr/local/bin/fpc`       | `C:\FPC\bin\x86_64-win64\fpc.exe` |
-| `FPCDIR`       | `/usr/share/fpcsrc` | `/opt/homebrew/share/fpcsrc` | `/usr/local/share/fpcsrc`  | `C:\Source`                       |
-| `LAZARUSDIR`   | `$HOME/.lazarus`    | `/usr/local/share/lazarus`   | `/usr/local/share/lazarus` | `C:\lazarus`                      |
-| `FPCTARGET`    | `linux`             | `darwin`                     | `darwin`                   | `win32`                           |
-| `FPCTARGETCPU` | `x86_64`/`aarch64`  | `aarch64`                    | `x86_64`                   | `x86_64`                          |
-
-Any of them can be overridden in Zed settings under
-`lsp.pascal-language-server.binary.env`, for example:
+The extension spawns `pasls` from `PATH` and passes it only the environment
+variables you set. **No environment variables are set by default** — configure
+the CodeTools environment your installation needs under
+`lsp.pascal.binary.env`, for example:
 
 ```json
 "lsp": {
   "pascal": {
     "binary": {
-      "path": "/opt/homebrew/bin/pasls",
       "env": {
-        "PP": "/opt/homebrew/bin/fpc",
-        "FPCDIR": "/opt/homebrew/share/fpcsrc",
-        "LAZARUSDIR": "~/Lazarus"
+        "PP": "/usr/bin/fpc",
+        "FPCDIR": "/usr/share/fpcsrc",
+        "LAZARUSDIR": "/usr/local/share/lazarus"
       }
     }
   }
 }
 ```
 
-- `PP` — path to the Free Pascal compiler binary.
-- `FPCDIR` — Free Pascal source directory.
-- `LAZARUSDIR` — Lazarus IDE directory.
-- `binary.path` / `binary.arguments` — override the pasls binary and args.
+- `PP` — path to the Free Pascal compiler binary (e.g. `/usr/bin/fpc`).
+- `FPCDIR` — Free Pascal source directory (e.g. `/usr/share/fpcsrc` on Debian/Ubuntu,
+  `/usr/local/share/fpcsrc` from source or Homebrew).
+- `LAZARUSDIR` — Lazarus sources directory (e.g. `/usr/local/share/lazarus`).
+- `FPCTARGET` — target operating system (e.g. `linux`, `darwin`, `win32`).
+- `FPCTARGETCPU` — target CPU (e.g. `x86_64`, `aarch64`).
